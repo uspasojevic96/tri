@@ -8,8 +8,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/uspasojevic96/tri/todo"
 )
+
+var priority int
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -25,13 +28,15 @@ to quickly create a Cobra application.`,
 }
 
 func addRun(cmd *cobra.Command, args []string) {
-	items, err := todo.ReadItems(".tridos.json")
+	items, err := todo.ReadItems(viper.GetString("datafile"))
 
 	for _, x := range args {
-		items = append(items, todo.Item{Text: x})
+		item := todo.Item{Text: x}
+		item.SetPriority(priority)
+		items = append(items, item)
 	}
 
-	err = todo.SaveItems(".tridos.json", items)
+	err = todo.SaveItems(viper.GetString("datafile"), items)
 
 	if err != nil {
 		err = fmt.Errorf("%v", err)
@@ -41,6 +46,7 @@ func addRun(cmd *cobra.Command, args []string) {
 func init() {
 	rootCmd.AddCommand(addCmd)
 
+	addCmd.Flags().IntVarP(&priority, "priority", "p", 2, "Priority:1,2,3")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
